@@ -7,7 +7,7 @@ using MyAspNetCoreApp.Hubs;
 var builder = WebApplication.CreateBuilder(args);
 
 // SQLite database setup
-var dbPath = Path.Combine(builder.Environment.ContentRootPath, "TicTacToe.db");
+var dbPath = Path.Combine("/home", "TicTacToe.db"); 
 
 // Ensure the database file exists
 if (!File.Exists(dbPath))
@@ -26,7 +26,7 @@ if (!RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
 builder.Services.AddControllers();
 builder.Services.AddSignalR();  
 builder.Services.AddDbContext<AppDbContext>(options =>
-    options.UseSqlite("Data Source=/home/tictactoe.db"));
+    options.UseSqlite($"Data Source={dbPath}"));
  
 builder.Services.AddCors(options =>
 {

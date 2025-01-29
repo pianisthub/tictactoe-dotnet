@@ -10,7 +10,7 @@ bin/
 obj/
 publish/
 logs/
-TicTacToe.db
+
 .vscode/
 *.user
 *.suo

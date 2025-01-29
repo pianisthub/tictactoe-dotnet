@@ -9,9 +9,12 @@
   </PropertyGroup>
 
   <ItemGroup>
-     
-    <None Include="tictactoe.db" CopyToPublishDirectory="Always" />
-  </ItemGroup>
+    <None Include="tictactoe.db">
+        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+        <CopyToPublishDirectory>Always</CopyToPublishDirectory>
+    </None>
+</ItemGroup>
+
 
   <ItemGroup>
     <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="9.0.0" />
