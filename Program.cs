@@ -7,7 +7,7 @@ using MyAspNetCoreApp.Hubs;
 var builder = WebApplication.CreateBuilder(args);
 
 // SQLite database setup
-var dbPath = Path.Combine("/home", "TicTacToe.db"); 
+var dbPath = Path.Combine("/opt/render", "TicTacToe.db"); 
 
 // Ensure the database file exists
 if (!File.Exists(dbPath))
