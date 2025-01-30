@@ -8,12 +8,11 @@
     <ContentTargetFolders>content</ContentTargetFolders>
   </PropertyGroup>
 
-  <ItemGroup>
-    <None Include="tictactoe.db">
+ <ItemGroup>
+    <None Include="tictactoe.db" Condition="Exists('tictactoe.db')">
         <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-        <CopyToPublishDirectory>Always</CopyToPublishDirectory>
     </None>
-</ItemGroup>
+  </ItemGroup>
 
 
   <ItemGroup>

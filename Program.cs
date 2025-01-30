@@ -7,7 +7,7 @@ using MyAspNetCoreApp.Hubs;
 var builder = WebApplication.CreateBuilder(args);
 
 // SQLite database setup
-var dbPath = Path.Combine("/opt/render", "TicTacToe.db"); 
+var dbPath = Path.Combine("/home", "TicTacToe.db"); 
 
 // Ensure the database file exists
 if (!File.Exists(dbPath))
@@ -48,10 +48,7 @@ var app = builder.Build();
 app.UseCors();
 app.UseRouting();
 app.MapHub<GameHub>("/gamehub");  
-app.UseEndpoints(endpoints =>
-{
-    endpoints.MapControllers();
-});
+app.MapControllers();
 
  
 app.Run();
