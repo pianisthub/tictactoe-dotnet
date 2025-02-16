@@ -20,13 +20,28 @@ namespace MyAspNetCoreApp.Controllers
         }
 
         [HttpPost("create")]
-        public IActionResult CreateGame([FromBody] string playerX)
+public IActionResult CreateGame([FromBody] string playerX)
+{
+    try
+    {
+        if (string.IsNullOrWhiteSpace(playerX))
         {
-            var game = new GameState { PlayerX = playerX };
-            _dbContext.GameStates.Add(game);
-            _dbContext.SaveChanges();
-            return Ok(new { gameId = game.GameId });
+            return BadRequest("Player X name is required.");
         }
+
+        var game = new GameState { PlayerX = playerX , CurrentTurn = "X" };
+        _dbContext.GameStates.Add(game);
+        _dbContext.SaveChanges();
+
+        return Ok(new { gameId = game.GameId });
+    }
+    catch (Exception ex)
+    {
+        Console.WriteLine($"  Error creating game: {ex.Message}");
+        return StatusCode(500, new { error = "An unexpected error occurred." });
+    }
+}
+
 
         [HttpPost("join/{gameId}")]
 public async Task<IActionResult> JoinGame(string gameId, [FromBody] string playerO)
@@ -49,7 +64,7 @@ public async Task<IActionResult> JoinGame(string gameId, [FromBody] string playe
      
     await _hubContext.Clients.Group(gameId).SendAsync("PlayerJoined", playerO);
 
-    return Ok(game);
+    return Ok(new { gameId = game.GameId, playerX = game.PlayerX, playerO = game.PlayerO });
 }
 
 
@@ -74,6 +89,20 @@ public async Task<IActionResult> MakeMove(string gameId, int row, int col, strin
         return NotFound("Game not found.");
     }
 
+    Console.WriteLine($"🔍 Player {player} is attempting a move.");
+    Console.WriteLine($"🔍 CurrentTurn BEFORE move: {game.CurrentTurn}");
+
+    if (game.Winner != "")
+    {
+        return BadRequest("Game is already over.");
+    }
+
+    if (game.CurrentTurn != player)
+    {
+        Console.WriteLine("  Move rejected: Not this player's turn.");
+        return BadRequest("It's not your turn.");
+    }
+
     var board = game.GetBoard();
     if (!string.IsNullOrEmpty(board[row][col]))
     {
@@ -82,38 +111,51 @@ public async Task<IActionResult> MakeMove(string gameId, int row, int col, strin
 
     board[row][col] = player;
     game.SetBoard(board);
+
+    
+    game.CurrentTurn = (game.CurrentTurn == "X") ? "O" : "X";
+
+    Console.WriteLine($"  Move registered! Next turn: {game.CurrentTurn}");
+
     game.Winner = CheckWinner(board);
     _dbContext.GameStates.Update(game);
     _dbContext.SaveChanges();
 
-     
-    var gameState = new { board = game.GetBoard(), winner = game.Winner };
+    var gameState = new { board = game.GetBoard(), winner = game.Winner, currentTurn = game.CurrentTurn };
     await _hubContext.Clients.Group(gameId).SendAsync("ReceiveGameUpdate", gameState);
 
     return Ok(gameState);
 }
 
 
-        [HttpPost("reset/{gameId}")]
-        public IActionResult ResetGame(string gameId)
-        {
-            var game = _dbContext.GameStates.FirstOrDefault(g => g.GameId == gameId);
-            if (game == null)
-            {
-                return NotFound("Game not found.");
-            }
 
-            game.SetBoard(new string[3][]
-            {
-                new string[3] { "", "", "" },
-                new string[3] { "", "", "" },
-                new string[3] { "", "", "" }
-            });
-            game.Winner = "";
-            _dbContext.GameStates.Update(game);
-            _dbContext.SaveChanges();
-            return Ok(game);
-        }
+
+       [HttpPost("reset/{gameId}")]
+public async Task<IActionResult> ResetGame(string gameId)
+{
+    var game = _dbContext.GameStates.FirstOrDefault(g => g.GameId == gameId);
+    if (game == null)
+    {
+        return NotFound("Game not found.");
+    }
+
+    game.SetBoard(new string[3][]
+    {
+        new string[3] { "", "", "" },
+        new string[3] { "", "", "" },
+        new string[3] { "", "", "" }
+    });
+
+    game.Winner = "";
+    game.CurrentTurn = "X";  
+    _dbContext.GameStates.Update(game);
+    _dbContext.SaveChanges();
+
+   await _hubContext.Clients.Group(gameId).SendAsync("GameReset", new { board = game.GetBoard(), currentTurn = game.CurrentTurn });
+
+    return Ok(new { message = "Game reset successfully", currentTurn = game.CurrentTurn });
+}
+
 
         private string CheckWinner(string[][] board)
         {

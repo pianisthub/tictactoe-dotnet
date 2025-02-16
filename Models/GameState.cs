@@ -8,6 +8,8 @@ namespace MyAspNetCoreApp.Models
         public string GameId { get; set; } = new Random().Next(1000, 9999).ToString();  
         public string PlayerX { get; set; } = "";
         public string PlayerO { get; set; } = "";
+
+        public string CurrentTurn { get; set; } = "X";
         
         
         public string Board { get; set; } = JsonSerializer.Serialize(new string[3][]

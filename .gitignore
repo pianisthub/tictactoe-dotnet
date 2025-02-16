@@ -12,6 +12,8 @@ publish/
 logs/
 TicTacToe.db
 
+Migrations/
+
 .vscode/
 *.user
 *.suo

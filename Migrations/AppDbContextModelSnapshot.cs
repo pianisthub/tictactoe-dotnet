@@ -26,6 +26,10 @@ namespace MyAspNetCoreApp.Migrations
                         .IsRequired()
                         .HasColumnType("TEXT");
 
+                    b.Property<string>("CurrentTurn")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
                     b.Property<string>("GameId")
                         .IsRequired()
                         .HasColumnType("TEXT");
